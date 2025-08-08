@@ -1,0 +1,75 @@
+/* styles.css - Tailwind CDN 前提。@apply は使用せず、必要最小の素CSSを補助として定義。 */
+/* 画面外周のマージン・パディング確保と、要素の重なり回避に配慮 */
+
+:root {
+  --radius: 0.75rem;
+}
+
+.input {
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db; /* gray-300 */
+  background-color: #ffffff;
+  padding: 0.5rem 0.75rem; /* px-3 py-2 */
+  font-size: 0.875rem; /* text-sm */
+  box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+}
+.input:focus {
+  outline: none;
+  border-color: #3b82f6; /* blue-500 */
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.5);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  background-color: #2563eb; /* blue-600 */
+  padding: 0.5rem 1rem; /* px-4 py-2 */
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+  cursor: pointer;
+}
+.btn:hover { background-color: #1d4ed8; }
+.btn:active { background-color: #1e40af; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  background-color: #e5e7eb; /* gray-200 */
+  padding: 0.5rem 1rem;
+  color: #1f2937; /* gray-800 */
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+}
+.btn-secondary:hover { background-color: #d1d5db; }
+.btn-secondary:active { background-color: #9ca3af; }
+
+.checkbox {
+  height: 1rem; /* h-4 */
+  width: 1rem;  /* w-4 */
+  accent-color: #2563eb; /* blue-600 */
+  border-radius: 0.25rem;
+}
+
+.console-area {
+  height: 14rem; /* h-56 */
+  overflow-y: auto;
+  background-color: #000000;
+  color: #86efac; /* green-300 */
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* スクロールバーの視認性向上（WebKit系） */
+#chatLog::-webkit-scrollbar, .console-area::-webkit-scrollbar { width: 10px; }
+#chatLog::-webkit-scrollbar-thumb, .console-area::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
