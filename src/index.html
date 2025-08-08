@@ -8,78 +8,96 @@
     <link rel="stylesheet" href="./css/styles.css" />
   </head>
   <body class="bg-gray-50 text-gray-900">
-    <header class="max-w-5xl mx-auto px-4 pt-6 pb-2">
-      <h1 class="text-2xl font-semibold">Azure AI Foundry - GPT-5 チャット（画像対応）</h1>
-      <p class="text-sm text-gray-600 mt-1">フロントエンドのみ・最新 v1 preview REST API 利用デモ</p>
+  <header class="w-[90vw] max-w-none mx-auto px-2 md:px-4 pt-6 pb-2">
+      <div class="flex items-end justify-between gap-4">
+        <div>
+          <h1 id="title" class="text-2xl font-semibold">Azure AI Foundry - GPT-5 チャット（画像対応）</h1>
+          <p id="subtitle" class="text-sm text-gray-600 mt-1">フロントエンドのみ・最新 v1 preview REST API 利用デモ</p>
+        </div>
+        <div class="min-w-[160px]">
+          <label class="block text-xs text-gray-600 mb-1" id="labelLang" for="langSelect">言語</label>
+          <select id="langSelect" class="input" aria-labelledby="labelLang" title="言語">
+            <option value="ja">日本語</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+      </div>
     </header>
 
-    <main class="max-w-5xl mx-auto px-4 pb-24">
-      <!-- 接続設定 -->
-      <section class="rounded-xl bg-white shadow p-4 md:p-6 mb-6 space-y-3">
-        <h2 class="text-lg font-medium">接続設定</h2>
-        <p class="text-xs text-gray-500">以下はローカルデモ用。実運用では Key Vault やトークンベース認証を推奨。</p>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label class="block">
-            <span class="text-sm">エンドポイント URL（例: https://YOUR-RESOURCE.openai.azure.com）</span>
-            <input id="endpoint" type="url" placeholder="https://..." class="mt-1 input" />
-          </label>
-          <label class="block">
-            <span class="text-sm">API バージョン（例: preview）</span>
-            <input id="apiVersion" type="text" placeholder="preview" class="mt-1 input" />
-          </label>
-          <label class="block">
-            <span class="text-sm">デプロイ名（model）※ Azure 側のデプロイ名</span>
-            <input id="deployment" type="text" placeholder="gpt-5" class="mt-1 input" />
-          </label>
-          <label class="block">
-            <span class="text-sm">API キー（または Bearer トークン）</span>
-            <input id="apiKey" type="password" placeholder="キーを入力" class="mt-1 input" />
-          </label>
-        </div>
-        <div class="flex items-center gap-2 pt-1">
-          <button id="saveSettings" class="btn">設定を保存</button>
-          <button id="clearSettings" class="btn-secondary">クリア</button>
-          <span id="settingsStatus" class="text-xs text-gray-600"></span>
-        </div>
-      </section>
-
-      <!-- チャット -->
-      <section class="rounded-xl bg-white shadow p-4 md:p-6 mb-6">
-        <h2 class="text-lg font-medium mb-3">チャット</h2>
-        <div id="chatLog" class="h-[48vh] overflow-y-auto pr-2 space-y-4 border rounded-lg p-3 bg-gray-50"></div>
-
-        <div class="mt-3 grid grid-cols-1 gap-3">
-          <div class="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 items-end">
-            <label class="block">
-              <span class="text-sm">メッセージ</span>
-              <textarea id="userInput" rows="3" placeholder="テキストを入力..." class="mt-1 input resize-y"></textarea>
-            </label>
-            <div class="flex flex-col gap-3">
+  <main class="w-[90vw] max-w-none mx-auto px-2 md:px-4 pb-24">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- 左ペイン: 接続設定 + ログ -->
+        <div class="space-y-6">
+          <!-- 接続設定 -->
+          <section class="rounded-xl bg-white shadow p-4 md:p-6 space-y-3">
+            <h2 id="connTitle" class="text-lg font-medium">接続設定</h2>
+            <p id="connNote" class="text-xs text-gray-500">以下はローカルデモ用。実運用では Key Vault やトークンベース認証を推奨。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <label class="block">
-                <span class="text-sm">画像ファイル（任意・複数可）</span>
-                <input id="imageFiles" type="file" accept="image/*" multiple class="mt-1 block w-full text-sm" />
+                <span id="labelEndpoint" class="text-sm">エンドポイント URL（例: https://YOUR-RESOURCE.openai.azure.com）</span>
+                <input id="endpoint" type="url" placeholder="https://..." class="mt-1 input" />
               </label>
-              <div class="flex gap-2">
-                <label class="inline-flex items-center gap-2 text-sm">
-                  <input id="streaming" type="checkbox" class="checkbox" />
-                  ストリーミング
+              <label class="block">
+                <span id="labelApiVersion" class="text-sm">API バージョン（例: preview）</span>
+                <input id="apiVersion" type="text" placeholder="preview" class="mt-1 input" />
+              </label>
+              <label class="block">
+                <span id="labelDeployment" class="text-sm">デプロイ名（model）※ Azure 側のデプロイ名</span>
+                <input id="deployment" type="text" placeholder="gpt-5" class="mt-1 input" />
+              </label>
+              <label class="block">
+                <span id="labelApiKey" class="text-sm">API キー（または Bearer トークン）</span>
+                <input id="apiKey" type="password" placeholder="キーを入力" class="mt-1 input" />
+              </label>
+            </div>
+            <div class="flex items-center gap-2 pt-1">
+              <button id="saveSettings" class="btn">設定を保存</button>
+              <button id="clearSettings" class="btn-secondary">クリア</button>
+              <span id="settingsStatus" class="text-xs text-gray-600"></span>
+            </div>
+          </section>
+
+          <!-- ログ -->
+          <section class="rounded-xl bg-white shadow p-4 md:p-6">
+            <h2 id="logsTitle" class="text-lg font-medium mb-3">コンソールログ</h2>
+            <pre id="consoleArea" class="console-area"></pre>
+          </section>
+        </div>
+
+        <!-- 右ペイン: チャット -->
+        <div>
+          <section class="rounded-xl bg-white shadow p-4 md:p-6 h-full">
+            <h2 id="chatTitle" class="text-lg font-medium mb-3">チャット</h2>
+            <div id="chatLog" class="h-[48vh] overflow-y-auto pr-2 space-y-4 border rounded-lg p-3 bg-gray-50"></div>
+
+            <div class="mt-3 grid grid-cols-1 gap-3">
+              <div class="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 items-end">
+                <label class="block">
+                  <span id="labelMessage" class="text-sm">メッセージ</span>
+                  <textarea id="userInput" rows="3" placeholder="テキストを入力..." class="mt-1 input resize-y"></textarea>
                 </label>
-                <button id="sendBtn" class="btn">送信</button>
+                <div class="flex flex-col gap-3">
+                  <label class="block">
+                    <span id="labelImages" class="text-sm">画像ファイル（任意・複数可）</span>
+                    <input id="imageFiles" type="file" accept="image/*" multiple class="mt-1 block w-full text-sm" />
+                  </label>
+                  <div class="flex gap-2">
+                    <label class="inline-flex items-center gap-2 text-sm">
+                      <input id="streaming" type="checkbox" class="checkbox" />
+                      <span id="labelStreaming">ストリーミング</span>
+                    </label>
+                    <button id="sendBtn" class="btn">送信</button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          </section>
         </div>
-      </section>
-
-      <!-- ログ -->
-      <section class="rounded-xl bg-white shadow p-4 md:p-6">
-        <h2 class="text-lg font-medium mb-3">コンソールログ</h2>
-        <pre id="consoleArea" class="console-area"></pre>
-      </section>
+      </div>
     </main>
 
-    <footer class="max-w-5xl mx-auto px-4 py-10 text-xs text-gray-500">
-      <p>注意: このデモはブラウザから直接 Azure AI Foundry のエンドポイントにアクセスします。CORS 設定が必要になる場合があります。</p>
+  <footer class="w-[90vw] max-w-none mx-auto px-2 md:px-4 py-10 text-xs text-gray-500">
+      <p id="footerNote">注意: このデモはブラウザから直接 Azure AI Foundry のエンドポイントにアクセスします。CORS 設定が必要になる場合があります。</p>
     </footer>
 
     <script src="./js/script.js" type="module"></script>

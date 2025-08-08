@@ -7,6 +7,23 @@
 // - ログは Playwright 自動テストで解析しやすいよう console.log / console.error を使い分けます。
 
 const els = {
+  // i18n
+  langSelect: document.getElementById('langSelect'),
+  title: document.getElementById('title'),
+  subtitle: document.getElementById('subtitle'),
+  labelLang: document.getElementById('labelLang'),
+  connTitle: document.getElementById('connTitle'),
+  connNote: document.getElementById('connNote'),
+  labelEndpoint: document.getElementById('labelEndpoint'),
+  labelApiVersion: document.getElementById('labelApiVersion'),
+  labelDeployment: document.getElementById('labelDeployment'),
+  labelApiKey: document.getElementById('labelApiKey'),
+  logsTitle: document.getElementById('logsTitle'),
+  chatTitle: document.getElementById('chatTitle'),
+  labelMessage: document.getElementById('labelMessage'),
+  labelImages: document.getElementById('labelImages'),
+  labelStreaming: document.getElementById('labelStreaming'),
+  footerNote: document.getElementById('footerNote'),
   endpoint: document.getElementById('endpoint'),
   apiVersion: document.getElementById('apiVersion'),
   deployment: document.getElementById('deployment'),
@@ -22,7 +39,104 @@ const els = {
   consoleArea: document.getElementById('consoleArea'),
 };
 
-// 初期化: localStorage から設定復元
+// i18n辞書
+const I18N = {
+  ja: {
+    title: 'Azure AI Foundry - GPT-5 チャット（画像対応）',
+    subtitle: 'フロントエンドのみ・最新 v1 preview REST API 利用デモ',
+    labelLang: '言語',
+    connTitle: '接続設定',
+    connNote: '以下はローカルデモ用。実運用では Key Vault やトークンベース認証を推奨。',
+    labelEndpoint: 'エンドポイント URL（例: https://YOUR-RESOURCE.openai.azure.com）',
+    labelApiVersion: 'API バージョン（例: preview）',
+    labelDeployment: 'デプロイ名（model）※ Azure 側のデプロイ名',
+    labelApiKey: 'API キー（または Bearer トークン）',
+    saveSettings: '設定を保存',
+    clearSettings: 'クリア',
+    logsTitle: 'コンソールログ',
+    chatTitle: 'チャット',
+    labelMessage: 'メッセージ',
+    messagePlaceholder: 'テキストを入力...',
+    labelImages: '画像ファイル（任意・複数可）',
+    labelStreaming: 'ストリーミング',
+    sendBtn: '送信',
+    footerNote: '注意: このデモはブラウザから直接 Azure AI Foundry のエンドポイントにアクセスします。CORS 設定が必要になる場合があります。',
+    infoRestored: '設定を復元しました。',
+    infoSaved: '設定を保存しました。',
+    infoCleared: '設定をクリアしました。',
+    mustInput: 'テキストまたは画像を入力してください',
+    mustConfig: 'エンドポイント、デプロイ名、API キーを設定してください',
+    emptyResponse: '[空の応答]',
+  },
+  en: {
+    title: 'Azure AI Foundry - GPT-5 Chat (Vision)',
+    subtitle: 'Frontend-only demo using the latest v1 preview REST API',
+    labelLang: 'Language',
+    connTitle: 'Connection',
+    connNote: 'Demo only. For production, use Key Vault or token-based auth.',
+    labelEndpoint: 'Endpoint URL (e.g., https://YOUR-RESOURCE.openai.azure.com)',
+    labelApiVersion: 'API Version (e.g., preview)',
+    labelDeployment: 'Deployment name (model) on Azure',
+    labelApiKey: 'API key (or Bearer token)',
+    saveSettings: 'Save',
+    clearSettings: 'Clear',
+    logsTitle: 'Console Logs',
+    chatTitle: 'Chat',
+    labelMessage: 'Message',
+    messagePlaceholder: 'Type your message...',
+    labelImages: 'Images (optional, multiple)',
+    labelStreaming: 'Streaming',
+    sendBtn: 'Send',
+    footerNote: 'Note: This demo calls Azure AI Foundry endpoint directly from the browser. CORS may be required.',
+    infoRestored: 'Settings restored.',
+    infoSaved: 'Settings saved.',
+    infoCleared: 'Settings cleared.',
+    mustInput: 'Please enter text or select images',
+    mustConfig: 'Please set endpoint, deployment, and API key',
+    emptyResponse: '[Empty response]',
+  }
+};
+
+function detectDefaultLang() {
+  const nav = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+  return nav.startsWith('ja') ? 'ja' : 'en';
+}
+
+function getLang() {
+  const saved = JSON.parse(localStorage.getItem('azureSettings') || '{}');
+  return saved.lang || detectDefaultLang();
+}
+
+function setLang(lang) {
+  const cfg = JSON.parse(localStorage.getItem('azureSettings') || '{}');
+  cfg.lang = lang;
+  localStorage.setItem('azureSettings', JSON.stringify(cfg));
+}
+
+function applyI18n(lang) {
+  const t = I18N[lang] || I18N.en;
+  if (els.title) els.title.textContent = t.title;
+  if (els.subtitle) els.subtitle.textContent = t.subtitle;
+  if (els.labelLang) els.labelLang.textContent = t.labelLang;
+  if (els.connTitle) els.connTitle.textContent = t.connTitle;
+  if (els.connNote) els.connNote.textContent = t.connNote;
+  if (els.labelEndpoint) els.labelEndpoint.textContent = t.labelEndpoint;
+  if (els.labelApiVersion) els.labelApiVersion.textContent = t.labelApiVersion;
+  if (els.labelDeployment) els.labelDeployment.textContent = t.labelDeployment;
+  if (els.labelApiKey) els.labelApiKey.textContent = t.labelApiKey;
+  if (els.logsTitle) els.logsTitle.textContent = t.logsTitle;
+  if (els.chatTitle) els.chatTitle.textContent = t.chatTitle;
+  if (els.labelMessage) els.labelMessage.textContent = t.labelMessage;
+  if (els.userInput) els.userInput.placeholder = t.messagePlaceholder;
+  if (els.labelImages) els.labelImages.textContent = t.labelImages;
+  if (els.labelStreaming) els.labelStreaming.textContent = t.labelStreaming;
+  if (els.footerNote) els.footerNote.textContent = t.footerNote;
+  if (els.saveSettings) els.saveSettings.textContent = t.saveSettings;
+  if (els.clearSettings) els.clearSettings.textContent = t.clearSettings;
+  if (els.sendBtn) els.sendBtn.textContent = t.sendBtn;
+}
+
+// 初期化: localStorage から設定復元 + 言語適用
 (function init() {
   try {
     const saved = JSON.parse(localStorage.getItem('azureSettings') || '{}');
@@ -30,7 +144,13 @@ const els = {
     if (saved.apiVersion) els.apiVersion.value = saved.apiVersion;
     if (saved.deployment) els.deployment.value = saved.deployment;
     if (saved.apiKey) els.apiKey.value = saved.apiKey;
-    logInfo('設定を復元しました。');
+    // 言語適用
+    const lang = getLang();
+    if (els.langSelect) {
+      els.langSelect.value = lang;
+    }
+    applyI18n(lang);
+    logInfo((I18N[lang]||I18N.en).infoRestored);
   } catch (e) {
     console.error('設定復元エラー', e);
   }
@@ -43,10 +163,12 @@ els.saveSettings.addEventListener('click', () => {
     apiVersion: (els.apiVersion.value || 'preview').trim(),
     deployment: (els.deployment.value || '').trim(),
     apiKey: (els.apiKey.value || '').trim(),
+    lang: els.langSelect ? els.langSelect.value : getLang(),
   };
   localStorage.setItem('azureSettings', JSON.stringify(cfg));
-  els.settingsStatus.textContent = '保存しました';
-  logInfo('設定を保存しました。');
+  const lang = cfg.lang;
+  els.settingsStatus.textContent = (I18N[lang]||I18N.en).infoSaved;
+  logInfo((I18N[lang]||I18N.en).infoSaved);
 });
 
 // 設定クリア
@@ -56,23 +178,37 @@ els.clearSettings.addEventListener('click', () => {
   els.apiVersion.value = '';
   els.deployment.value = '';
   els.apiKey.value = '';
-  els.settingsStatus.textContent = 'クリアしました';
-  logInfo('設定をクリアしました。');
+  const lang = detectDefaultLang();
+  if (els.langSelect) els.langSelect.value = lang;
+  applyI18n(lang);
+  els.settingsStatus.textContent = (I18N[lang]||I18N.en).infoCleared;
+  logInfo((I18N[lang]||I18N.en).infoCleared);
 });
+
+// 言語ドロップダウン変更
+if (els.langSelect) {
+  els.langSelect.addEventListener('change', () => {
+    const lang = els.langSelect.value;
+    setLang(lang);
+    applyI18n(lang);
+  });
+}
 
 // 送信
 els.sendBtn.addEventListener('click', async () => {
   try {
     const text = els.userInput.value.trim();
     const files = Array.from(els.imageFiles.files || []);
+    const lang = getLang();
+    const t = I18N[lang] || I18N.en;
     if (!text && files.length === 0) {
-      alert('テキストまたは画像を入力してください');
+      alert(t.mustInput);
       return;
     }
 
     const cfg = getConfig();
     if (!cfg.endpoint || !cfg.deployment || !cfg.apiKey) {
-      alert('エンドポイント、デプロイ名、API キーを設定してください');
+      alert(t.mustConfig);
       return;
     }
 
@@ -138,17 +274,20 @@ function addChatBubble(role, text, files) {
   }
 
   if (files && files.length > 0) {
-    const grid = document.createElement('div');
-    grid.className = 'mt-2 grid grid-cols-3 gap-2';
+    // 画像はチャットバブルの横幅に収まる最大サイズで表示（縦に並べる）
+    const wrapImgs = document.createElement('div');
+    wrapImgs.className = 'mt-2 flex flex-col gap-3';
     files.forEach(f => {
       const url = URL.createObjectURL(f);
       const img = document.createElement('img');
       img.src = url;
       img.alt = f.name;
-      img.className = 'w-full h-24 object-cover rounded-md border';
-      grid.appendChild(img);
+      // 横幅いっぱい、縦は自動。過度な縦長を防ぐために最大高さを設定
+      img.className = 'w-full h-auto max-h-[70vh] object-contain rounded-md border';
+      img.onload = () => URL.revokeObjectURL(url);
+      wrapImgs.appendChild(img);
     });
-    bubble.appendChild(grid);
+    bubble.appendChild(wrapImgs);
   }
 
   wrap.appendChild(bubble);
@@ -247,7 +386,8 @@ async function sendNonStreaming(cfg, text, files) {
 
   const json = await res.json();
   logInfo('レスポンス受信 (non-stream)', json);
-  const assistantText = extractTextFromResponse(json) || '[空の応答]';
+  const lang = getLang();
+  const assistantText = extractTextFromResponse(json) || (I18N[lang]||I18N.en).emptyResponse;
   addChatBubble('assistant', assistantText);
 }
 
